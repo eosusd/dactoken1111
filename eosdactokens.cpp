@@ -147,7 +147,7 @@ namespace eosdac {
         const auto &from = from_acnts.get(value.symbol.code().raw());
         eosio_assert(from.balance.amount >= value.amount, "ERR::TRANSFER_OVERDRAWN::overdrawn balance");
 
-        from_acnts.modify(from, owner, [&](auto &a) {
+        from_acnts.modify(from, same_payer, [&](auto &a) {
             a.balance -= value;
         });
     }
