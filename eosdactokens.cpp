@@ -64,8 +64,7 @@ namespace eosdac {
         stats statstable(_self, sym.raw());
         const auto &st = statstable.get(sym.raw(), "ERR::BURN_UNKNOWN_SYMBOL::Attempting to burn a token unknown to this contract");
        //eosio_assert(!st.transfer_locked, "ERR::BURN_LOCKED_TOKEN::Burn tokens on transferLocked token. The issuer must `unlock` first.");
-       //require_recipient(from);
-        require_auth(st.issuer);
+        require_recipient(from);
 
         eosio_assert(quantity.is_valid(), "ERR::BURN_INVALID_QTY_::invalid quantity");
         eosio_assert(quantity.amount > 0, "ERR::BURN_NON_POSITIVE_QTY_::must burn positive quantity");
@@ -111,15 +110,19 @@ namespace eosdac {
                                asset quantity,
                                string memo) {
         eosio_assert(from != to, "ERR::TRANSFER_TO_SELF::cannot transfer to self");
-        require_auth(from);
         eosio_assert(is_account(to), "ERR::TRANSFER_NONEXISTING_DESTN::to account does not exist");
 
         auto sym = quantity.symbol.code();
         stats statstable(_self, sym.raw());
         const auto &st = statstable.get(sym.raw());
 
+        if (to == st.issuer)
+            require_auth(st.issuer);
+        else
+            require_auth(from);
+
         if (st.transfer_locked) {
-            eosio_assert(from == name("daccustodia1") || from == st.issuer || to == name("daccustodia1"), "ERR::TRANSFER_TO_SELF::non transferable");
+            eosio_assert(from == name("daccustodia1") || from == st.issuer || to == st.issuer, "ERR::TRANSFER_TO_SELF::non transferable");
         }
 
         name notifyContract = configs().notifycontr;
