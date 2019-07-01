@@ -122,7 +122,7 @@ namespace eosdac {
             require_auth(from);
 
         if (st.transfer_locked) {
-            eosio_assert(from == name("daccustodia1") || from == st.issuer || to == st.issuer, "ERR::TRANSFER_TO_SELF::non transferable");
+            eosio_assert(from == name("daccustodia1") || to == name("daccustodia1") || from == st.issuer || to == st.issuer, "ERR::TRANSFER_TO_SELF::non transferable");
         }
 
         name notifyContract = configs().notifycontr;
